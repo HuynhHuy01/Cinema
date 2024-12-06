@@ -1,13 +1,36 @@
 from django.db.models import Count
 from django.views.generic import DetailView, ListView
 from utils.tools import get_client_ip
-from .models import Serie, Film, Part, Season, FilmByQuality, FilmVisit, SerieVisit, Genre, Date,Shows,Bookings,Payment,Comment
+from .models import Serie, Film, Part, Season, FilmByQuality, FilmVisit, SerieVisit, Genre, Date,Shows,Bookings,Payment,Comment,ChatHistory,ChatMessage
 from django.shortcuts import get_object_or_404, render,redirect
 from django.urls import reverse
 from django.http import HttpResponse
-from django.views import View
-from django.contrib.auth.decorators import login_required
 from .forms import CommentForm
+
+
+
+
+from nltk.stem import WordNetLemmatizer 
+from nltk.tokenize import word_tokenize
+import random,json
+import numpy as np
+
+from tensorflow import keras
+import tensorflow
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Dropout  
+
+import nltk
+import pickle
+
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+# nltk.download('punkt')
+# nltk.download('wordnet')
+
+from keras.models import load_model
+
+
 
 class SerieComponent(DetailView):
     template_name = 'serie_download_page.html'
@@ -37,6 +60,10 @@ class SerieComponent(DetailView):
         return context
 
 from django.utils import timezone
+from transformers import pipeline
+
+
+sentiment_analyzer = pipeline("sentiment-analysis")
 class FilmComponent(DetailView):
     template_name = 'film_download_page.html'
     model = Film
@@ -57,6 +84,8 @@ class FilmComponent(DetailView):
         context['loop_time'] = range(5,0,-1)
         context['loop_times'] = range(1,6)
        
+        
+
         if self.request.user.is_authenticated:
             context['is_favorite'] = self.request.user.saved_films.filter(pk=loaded_film.id).exists()
 
@@ -82,6 +111,7 @@ class FilmComponent(DetailView):
             comment = get_object_or_404(Comment, id=edit_comment_id)  # Fetch the comment
             if comment.user == request.user:  # Ensure the user is the comment owner
                 comment.content = request.POST.get('content')  # Update the comment content
+                # comment.content = request.POST.get('content', comment.content)
                 comment.created_at = timezone.now()  # Update created_at to now
                 comment.save()  # Save the comment
                 return redirect(reverse('film-page', kwargs={'slug': self.object.slug}))
@@ -99,17 +129,54 @@ class FilmComponent(DetailView):
             
         form = CommentForm(request.POST)
         if form.is_valid():
+
+            content = form.cleaned_data['content']
+            # Perform sentiment analysis on the content
+            sentiment_result = sentiment_analyzer(content)
+            sentiment = sentiment_result[0]['label']
+            score = sentiment_result[0]['score']
+
+            # Default comment status is 'pending'
+            status = 'pending'
+
+        # Check sentiment score and decide the status
+        if sentiment == "NEGATIVE" and score > 0.8:
+            # If the comment is too negative, set status as 'rejected'
+            status = 'rejected'
+            return JsonResponse({'error': 'Your comment is too negative to be posted.'}, status=400)
+        elif sentiment == "NEUTRAL":
+            # If the comment is neutral, set status as 'pending'
+            status = 'pending'
+        else:
+            # If it's positive, set status as 'approved'
+            status = 'approved' if score > 0.5 else 'pending'
+
+
             comment = form.save(commit=False)
             comment.film = self.object
             comment.user = request.user
+            comment.status = status
             comment.save()
-            return redirect(reverse('film-page', kwargs={'slug': self.object.slug}))
+            
+            # if status == 'rejected':
+            #     return JsonResponse({'error': 'Your comment has been rejected due to negative content.'}, status=400)
+            
+            # return redirect(reverse('film-page', kwargs={'slug': self.object.slug}))
+            return JsonResponse({
+            'success': 'Your comment has been posted successfully.',
+            'user': comment.user.username,
+            'content': comment.content,
+            'rating': comment.rating
+        })
+
+    # If form is not valid, re-render page with form errors
+        return JsonResponse({'error': 'There was an error submitting your comment.'}, status=400)
         
         # If form is not valid, re-render page with form errors
         context = self.get_context_data()
         context['form'] = form
         return self.render_to_response(context)
-    
+
 
 class FilmList(ListView):
     template_name = 'films_page.html'
@@ -189,6 +256,148 @@ def add_shows(request):
     return render(request,"addshow.html")
 
 
+def ChatBot(request):
+    return render(request,"chatbot/chat.html")
+
+
+from tensorflow.keras.optimizers import SGD
+def train_chatbot():
+    lemmatizer = WordNetLemmatizer()
+
+    # Load intents
+    with open('jsonfile.json') as file:
+        intents = json.load(file)
+
+    words = []
+    classes = []
+    documents = []
+
+    # Process intents
+    for intent in intents['intents']:
+        for pattern in intent['patterns']:
+            word_list = word_tokenize(pattern)
+            words.extend(word_list)
+            documents.append((word_list, intent['tag']))
+            if intent['tag'] not in classes:
+                classes.append(intent['tag'])
+
+    words = sorted(set([lemmatizer.lemmatize(w.lower()) for w in words if w not in ['is', 'and', 'the', 'a', 'are', 'i', 'it']]))
+    classes = sorted(set(classes))
+
+    # Save words and classes
+    pickle.dump(words, open('words.pkl', 'wb'))
+    pickle.dump(classes, open('classes.pkl', 'wb'))
+
+    training = []
+    output_empty = [0] * len(classes)
+
+    for document in documents:
+        bag = []
+        word_patterns = [lemmatizer.lemmatize(word.lower()) for word in document[0]]
+
+        for word in words:
+            bag.append(1) if word in word_patterns else bag.append(0)
+
+        output_row = list(output_empty)
+        output_row[classes.index(document[1])] = 1
+        training.append([bag, output_row])
+
+    random.shuffle(training)
+    training = np.array(training, dtype=object)
+    train_x = list(training[:, 0])
+    train_y = list(training[:, 1])
+
+    # Build the model
+    model = Sequential([
+        Dense(128, input_shape=(len(train_x[0]),), activation='relu'),
+        Dropout(0.2),
+        Dense(64, activation='relu'),
+        Dropout(0.2),
+        Dense(len(train_y[0]), activation='softmax')
+    ])
+
+    # Compile the model
+    sgd = SGD(learning_rate=0.01, momentum=0.9, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+
+    # Train the model
+    model.fit(np.array(train_x), np.array(train_y), epochs=20, batch_size=1, verbose=1)
+
+    # Save the model
+    model.save('chatbot_model.h5')
+    print("Model training complete and saved as chatbot_model.h5")
+
+train_chatbot()
+
+
+def Chat(request):
+   query = str(request.GET.get("query"))
+   lemmatizer = WordNetLemmatizer()
+
+   with open('jsonfile.json') as fileobj:
+      readobj=json.load(fileobj)
+
+   words = pickle.load(open('words.pkl', 'rb'))
+   classes = pickle.load(open('classes.pkl', 'rb'))
+
+   model = load_model('chatbot_model.h5')   
+   
+   def cleaning_up_message(message):
+      message_word = word_tokenize(message)
+      message_word = [lemmatizer.lemmatize(word.casefold()) for word in message_word]
+      return message_word
+
+
+   def bag_of_words(message):
+      message_word = cleaning_up_message(message)
+      bag = [0]*len(words)
+      for w in message_word:
+         for i, word in enumerate(words):
+               if word == w:
+                  bag[i] = 1
+      return np.array(bag)
+      
+   INTENT_NOT_FOUND_THRESHOLD = 0.25
+
+   def predict_intent_tag(message):
+      BOW = bag_of_words(message)
+      res = model.predict(np.array([BOW]))[0]
+      results = [[i,r] for i,r in enumerate(res) if r > INTENT_NOT_FOUND_THRESHOLD ]
+      results.sort(key = lambda x : x[1] , reverse = True)
+      return_list = []
+      for r in results:
+         return_list.append({ 'intent': classes[r[0]], 'probability': str(r[1]) })
+      return return_list
+
+   def get_response(intents_list , intents_json):
+      tag = intents_list[0]['intent']
+      list_of_intents = intents_json['intents']
+      for i in list_of_intents:
+         if i['tag'] == tag :
+               result= random.choice (i['responses'])
+               break
+      return result
+
+   print(" Aapi is Running ! ")
+   message = query
+   ints = predict_intent_tag(message)
+   bot_response = get_response(ints, readobj)
+
+   user = request.user
+
+   chat_history,created = ChatHistory.objects.get_or_create(user=user)
+
+  
+   ChatMessage.objects.create(chat_history = chat_history, message=query, bot_response=bot_response)
+   return JsonResponse({"Bot": bot_response})
+
+
+
+
+
+
+
+
 
 
 
@@ -229,11 +438,13 @@ def hmacsha512(key, data):
     return hmac.new(byteKey, byteData, hashlib.sha512).hexdigest()
 
 
-def payment(request,id):
-    payment = Bookings.objects.get(id=id)
+def payment(request, id):
+    try:
+        payment = Bookings.objects.get(id=id)
+    except Bookings.DoesNotExist:
+        return render(request, "payment/payment.html", {"title": "Thanh toán", "error": "Payment not found"})
 
     if request.method == 'POST':
-        # Process input data and build url payment
         form = PaymentForm(request.POST)
         if form.is_valid():
             order_type = form.cleaned_data['order_type']
@@ -243,35 +454,39 @@ def payment(request,id):
             bank_code = form.cleaned_data['bank_code']
             language = form.cleaned_data['language']
             ipaddr = get_client_ip(request)
-            # Build URL Payment
-            vnp = vnpay()
-            vnp.requestData['vnp_Version'] = '2.1.0'
-            vnp.requestData['vnp_Command'] = 'pay'
-            vnp.requestData['vnp_TmnCode'] = settings.VNPAY_TMN_CODE
-            vnp.requestData['vnp_Amount'] = amount * 100000
-            vnp.requestData['vnp_CurrCode'] = 'VND'
-            vnp.requestData['vnp_TxnRef'] = order_id
-            vnp.requestData['vnp_OrderInfo'] = order_desc
-            vnp.requestData['vnp_OrderType'] = order_type
-            # Check language, default: vn
-            if language and language != '':
-                vnp.requestData['vnp_Locale'] = language
-            else:
-                vnp.requestData['vnp_Locale'] = 'vn'
-                # Check bank_code, if bank_code is empty, customer will be selected bank on VNPAY
-            if bank_code and bank_code != "":
-                vnp.requestData['vnp_BankCode'] = bank_code
 
-            vnp.requestData['vnp_CreateDate'] = datetime.now().strftime('%Y%m%d%H%M%S')  # 20150410063022
-            vnp.requestData['vnp_IpAddr'] = ipaddr
-            vnp.requestData['vnp_ReturnUrl'] = settings.VNPAY_RETURN_URL
-            vnpay_payment_url = vnp.get_payment_url(settings.VNPAY_PAYMENT_URL, settings.VNPAY_HASH_SECRET_KEY)
-            print(vnpay_payment_url)
-            return redirect(vnpay_payment_url)
+            try:
+                vnp = vnpay()  # Ensure vnpay() is correctly defined
+                vnp.requestData['vnp_Version'] = '2.1.0'
+                vnp.requestData['vnp_Command'] = 'pay'
+                vnp.requestData['vnp_TmnCode'] = settings.VNPAY_TMN_CODE
+                vnp.requestData['vnp_Amount'] = amount * 100000
+                vnp.requestData['vnp_CurrCode'] = 'VND'
+                vnp.requestData['vnp_TxnRef'] = order_id
+                vnp.requestData['vnp_OrderInfo'] = order_desc
+                vnp.requestData['vnp_OrderType'] = order_type
+
+                if language:
+                    vnp.requestData['vnp_Locale'] = language
+                else:
+                    vnp.requestData['vnp_Locale'] = 'vn'
+
+                if bank_code:
+                    vnp.requestData['vnp_BankCode'] = bank_code
+
+                vnp.requestData['vnp_CreateDate'] = datetime.now().strftime('%Y%m%d%H%M%S')
+                vnp.requestData['vnp_IpAddr'] = ipaddr
+                vnp.requestData['vnp_ReturnUrl'] = settings.VNPAY_RETURN_URL
+                vnpay_payment_url = vnp.get_payment_url(settings.VNPAY_PAYMENT_URL, settings.VNPAY_HASH_SECRET_KEY)
+                return redirect(vnpay_payment_url)
+            except Exception as e:
+                print(f"Error: {e}")
+                return render(request, "payment/payment.html", {"title": "Thanh toán", "payment": payment, "error": "Payment processing failed"})
         else:
-            print("Form input not validate")
+            print(form.errors)
+            return render(request, "payment/payment.html", {"title": "Thanh toán", "payment": payment, "error": "Form is invalid"})
     else:
-        return render(request, "payment/payment.html", {"title": "Thanh toán","payment":payment})
+        return render(request, "payment/payment.html", {"title": "Thanh toán", "payment": payment})
 
 
 def payment_ipn(request):
@@ -321,8 +536,6 @@ def payment_ipn(request):
 
 def payment_return(request):
     inputData = request.GET
-      
-       
     if inputData:
         vnp = vnpay()
         vnp.responseData = inputData.dict()

@@ -1047,7 +1047,7 @@ main > h1 {
 .AdameMatlab {
     text-align: center;
     width: 200px;
-    height: 60px;
+    /* height: 60px; */
     margin-top: 47px;
     border-radius: 20px;
     padding: 10px;

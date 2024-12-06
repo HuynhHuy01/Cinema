@@ -19,4 +19,5 @@ admin.site.register(models.Shows)
 admin.site.register(models.Bookings)
 admin.site.register(models.Payment)
 admin.site.register(models.Comment)
-
+admin.site.register(models.ChatHistory)
+admin.site.register(models.ChatMessage)

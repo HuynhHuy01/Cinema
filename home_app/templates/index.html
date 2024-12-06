@@ -208,7 +208,7 @@
                                     : {{ film.director }}</div>
                                 <div class="Cast"><i class="fas fa-users" aria-hidden="true"></i>Cast : {{ film.cast }}
                                 </div>
-
+                                
                                 <div class="Des">
                                     <p>
                                         {{ film.description }}
@@ -216,12 +216,23 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="Continue">
-                            <form action="{{ film.get_absolute_url }}">
-                                <button class="AdameMatlab">Booking</button>
-                            </form>
+                        
+                        <div class="d-flex flex-wrap justify-content-between">
+                            {% for show in film.movie_show.all %}
+                                <div class="col-lg-3 col-md-4 col-6 mb-3">
+                                    <form action="{% url 'seat' show.shows %}">
+                                        <button class="AdameMatlab btn btn-primary w-100 d-flex flex-column align-items-center">
+                                            <div class="d-flex flex-column text-center">
+                                                <span class="show-time">{{ show.start_time|date:"h:i A" }}</span>
+                                                <span class="show-date">{{ show.date}}</span>
+                                            </div>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endfor %}
                         </div>
+                    
+                    
                     </article>
                 {% endfor %}
                 {% for serie in latest_added_series %}
@@ -283,5 +294,7 @@
     </section>
     <div class="nav-mask">
     </div>
-
+    {% if user.is_authenticated %}
+    {% include 'chatbot/chat.html' %}
+    {% endif %}
 {% endblock %}

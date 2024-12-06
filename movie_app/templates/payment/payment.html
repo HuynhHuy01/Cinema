@@ -7,15 +7,15 @@
             {% csrf_token %} 
 
             <div class="form-group">
-                <label for="order_book">Tên bộ phim </label>
+                <label for="order_book">Tài khoản </label>
                 <input class="form-control" id="order_book"
-                       name="order_book" type="text" value="{{payment.shows.film.name}}"/>
+                       name="order_book" type="text" value="{{payment.user}}"/>
             </div>
 
             <div class="form-group">
-                <label for="order_type">Tài khoản </label>
+                <label for="order_type">Tên bộ phim </label>
                 <input class="form-control" id="order_type"
-                       name="order_type" type="text" value="{{payment.user}}"/>
+                       name="order_type" type="text" value="{{payment.shows.film.name}}"/>
             </div>
             <div class="form-group">
                 <label for="order_id">Mã đặt vé </label>

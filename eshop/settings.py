@@ -26,6 +26,8 @@ THUMBNAIL_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+OPENAI_API_KEY = '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'
+
 # Application definition
 
 AUTH_USER_MODEL = "user_app.User"
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'eshop.urls'
@@ -111,13 +114,29 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+
+
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('vn', 'Vietnamese'),
+]
+
+
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',  # Adjust path to where you'll store translations
+]
+
+
 
 # TIME_ZONE = 'UTC'
 TIME_ZONE = 'Asia/Ho_Chi_Minh'
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

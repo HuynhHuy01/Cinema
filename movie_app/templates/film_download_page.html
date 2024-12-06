@@ -111,18 +111,27 @@
         {% if user.is_authenticated %}
 
         <div class="DownloadBox">
-            <div class="DWContainer">
+            <div class="d-flex flex-wrap justify-content-between">
                 {% for show in film.movie_show.all %}
-                <div class="DWTitle">
-                    <a href="{% url 'seat' show.shows %}">Booking</a>
-                </div>
+                    <div class="col-lg-3 col-md-4 col-6 mb-3">
+                        <form action="{% url 'seat' show.shows %}" method="get">
+                            <button class="AdameMatlab btn btn-primary w-100 d-flex flex-column align-items-center">
+                                <div class="d-flex flex-column text-center">
+                                    <span class="show-time">{{ show.start_time|date:"h:i A" }}</span>
+                                    <span class="show-date">{{ show.date}}</span>
+                                </div>
+                            </button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+                
                 <!-- <div class="DWItems">
                         {% for quality in film_qualities %}
                             <p><span class="blt"><a href="{{ quality.file.url }}">{{ quality }}</a></span></p>
                         {% endfor %}
                     </div> -->
-                {% endfor %}
-            </div>
+               
 
             {% endif %}
         </div>
@@ -172,7 +181,9 @@
                 <button onclick="closeRatingAlert()" style="padding: 10px 20px; background-color: #ff4444; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">OK</button>
             </div>
 
-
+            <div id="errorMessage" class="alert alert-danger" style="display: none;margin-top: 1rem;"></div>
+            <div id="successMessage" class="alert alert-success" style="display: none;margin-top: 1rem;"></div>
+            <span id="pendingTag" style="display: none; color: gray; font-weight: bold;">Pending</span>
 
             {% else %}
             <div class="alert alert-danger" style="background-color: black;border: black;">
@@ -185,7 +196,7 @@
         </div>
 
         <div class="mt-4">
-            <h4 class="text-light">Comments</h4>
+            <h4 class="text-light">Reviews</h4>
             {% for comment in comments %}
             <div class="card mt-3 p-3" style="background-color: #222;">
                 <p class="text-light">{{ comment.user.username }}</p>
@@ -309,6 +320,7 @@
 
 <div class="nav-mask">
 </div>
+
 <script type="text/javascript">
 
     $(".DWTitle").each((index, item) => {
@@ -316,7 +328,6 @@
             $($(".DWItems")[index]).slideToggle(200);
         })
     })
-
 
 </script>
 
@@ -356,13 +367,50 @@ function validateRating(event) {
     const ratingAlert = document.getElementById('ratingAlert');
     const overlay = document.getElementById('overlay');
 
+    const errorMessage = document.getElementById('errorMessage');  // Assuming this element shows errors
+    const successMessage = document.getElementById('successMessage'); // Assuming this shows success
+
     // If no rating is selected, show the alert
+    errorMessage.style.display = 'none';
+
     if (!rating || !comment) {
         ratingAlert.style.display = 'block';
         overlay.style.display = 'block';
     } else {
         // If a rating is selected, submit the form
-        document.getElementById('ratingForm').submit();
+        // document.getElementById('ratingForm').submit();
+        const formData = new FormData(document.getElementById('ratingForm'));
+        
+        fetch(document.getElementById('ratingForm').action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value  // CSRF token
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                // If the comment is rejected, show an error notification
+                errorMessage.textContent = data.error;  // Set the error message text
+                errorMessage.style.display = 'block';   // Show the error message
+        
+                document.querySelector('textarea[name="content"]').value = '';
+            } else {
+                // If the comment is successfully posted, show a success notification
+                successMessage.textContent = 'Your comment has been posted successfully!';
+                successMessage.style.display = 'block'
+                window.location.reload();
+            }
+            if (data.status === 'pending') {
+                pendingTag.style.display = 'inline';  // Show the "Pending" tag
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('There was an error submitting your comment.');
+        });
+    
     }
 }
 
@@ -370,10 +418,13 @@ function validateRating(event) {
 function closeRatingAlert() {
     document.getElementById('ratingAlert').style.display = 'none';
     document.getElementById('overlay').style.display = 'none';
+
 }
 
+
+
 // Add event listener for the submit button
-document.querySelector('.submit-btn').addEventListener('click', validateRating);
+// document.querySelector('.submit-btn').addEventListener('click', validateRating);
 
 
 </script>
