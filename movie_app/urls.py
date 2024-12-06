@@ -13,7 +13,8 @@ urlpatterns = [
     path('bookings',views.bookings, name='bookings'),
     path('delete/<int:id>',views.delete,name='delete'),
     path('addshows/',views.add_shows,name='show'),
-
+    path('chatbot/',views.ChatBot,name ='chatbot'),
+    path('chat/',views.Chat,name ='chat'),
 
     path('pay',views.index, name='index'),
     path('payment/<int:id>',views.payment, name='payment'),
@@ -21,5 +22,6 @@ urlpatterns = [
     path('payment_return',views.payment_return, name='payment_return'),
     path('query',views.query, name='query'),
     path('refund',views.refund, name='refund'),
+    
 
 ]

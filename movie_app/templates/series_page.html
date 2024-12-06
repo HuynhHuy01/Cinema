@@ -111,5 +111,7 @@
     </section>
     <div class="nav-mask">
     </div>
-
+    {% if user.is_authenticated %}
+    {% include 'chatbot/chat.html' %}
+    {% endif %}
 {% endblock %}

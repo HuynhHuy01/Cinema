@@ -179,7 +179,7 @@ class Shows(models.Model):
     screen = models.CharField(max_length=300,default="Screen 1")
     start_time= models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
-    date=models.CharField(max_length=15, default="")
+    date =models.CharField(max_length=15, default="")
     price = models.DecimalField(max_digits=10, decimal_places=3, default=Decimal('0.000'))
 
 
@@ -262,6 +262,8 @@ class Payment(models.Model):
     vnp_TransactionNo = models.CharField(max_length=200,null=True,blank=True)
     vnp_ResponseCode = models.CharField(max_length=200,null=True,blank=True)    
 
+
+
 class Comment(models.Model):
     film = models.ForeignKey(to=Film, on_delete=models.CASCADE)
     user = models.ForeignKey(to='user_app.User', null=True, blank=True, on_delete=models.CASCADE)
@@ -269,8 +271,42 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     rating = models.IntegerField(choices=[(1, '1 star'), (2, '2 stars'), (3, '3 stars'), (4, '4 stars'), (5, '5 stars')])
 
+    status = models.CharField(max_length=20, default='approved', 
+                            choices=[('approved', 'Approved'), ('pending', 'Pending'), ('rejected', 'Rejected')])
+
+
+
     class Meta:
         ordering = ['-created_at']  # Sắp xếp theo `created_at` giảm dần
     def __str__(self):
         return f"Comment by {self.user} on {self.film.name}"
 
+class ChatHistory(models.Model):
+    user = models.ForeignKey(to='user_app.User', null=True, blank=True, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)  # Thời gian tạo lịch sử chat
+    last_message = models.TextField(null=True, blank=True)  # Lưu tin nhắn cuối cùng
+    last_response = models.TextField(null=True, blank=True)  # Lưu phản hồi cuối cùng
+
+    def update_last_message(self, message, response):
+        self.last_message = message
+        self.last_response = response
+        self.save()
+
+    def __str__(self):
+        return f"Chat history for {self.user.username} created at {self.created_at}"    
+
+class ChatMessage(models.Model):
+    chat_history = models.ForeignKey(ChatHistory, on_delete=models.CASCADE, related_name="messages")  # Liên kết với lịch sử chat
+    message = models.TextField()  # The user's message
+    bot_response = models.TextField()  # The bot's response
+    timestamp = models.DateTimeField(auto_now_add=True)  # Timestamp for when the message was created
+   
+    def save(self, *args, **kwargs):
+        # Lưu tin nhắn
+        super().save(*args, **kwargs)
+        
+        # Cập nhật lịch sử chat với tin nhắn và phản hồi cuối cùng
+        self.chat_history.update_last_message(self.message, self.bot_response)
+
+    def __str__(self):
+        return f"Message from {self.chat_history.user.username} at {self.timestamp}"
