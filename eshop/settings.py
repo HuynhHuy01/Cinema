@@ -26,7 +26,6 @@ THUMBNAIL_DEBUG = True
 
 ALLOWED_HOSTS = []
 
-OPENAI_API_KEY = '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'
 
 # Application definition
 
