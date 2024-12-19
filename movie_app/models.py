@@ -173,34 +173,44 @@ class FilmVisit(Model):
     
 from decimal import Decimal
 
+
+
+from django.core.exceptions import ValidationError
+
 class Shows(models.Model):
     shows=models.AutoField(primary_key=True)
-    film = models.ForeignKey(to=Film, on_delete=models.CASCADE,related_name='movie_show')
+    film = models.ForeignKey(to=Film, on_delete=models.CASCADE,related_name='movie_show',null=True,blank=True)
+    serie = models.ForeignKey(to=Serie, on_delete=models.CASCADE,related_name='serie_show',null=True,blank=True)
     screen = models.CharField(max_length=300,default="Screen 1")
     start_time= models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
     date =models.CharField(max_length=15, default="")
     price = models.DecimalField(max_digits=10, decimal_places=3, default=Decimal('0.000'))
-
-
-    def save(self, *args, **kwargs):
-        # If end_time is not provided, set it 2 hours after start_time
-        if self.start_time and not self.end_time:
-            # Convert start_time to a datetime object to perform time arithmetic
-            start_datetime = datetime.combine(datetime.today(), self.start_time)
-            end_datetime = start_datetime + timedelta(hours=2)  # Add 2 hours
-            self.end_time = end_datetime.time()  # Set end_time to the result time
-        
-        super().save(*args, **kwargs)  # Call the parent class's save method
+   
+    def clean(self):
+        # Kiểm tra nếu cả 'film' và 'serie' đều có giá trị
+        if self.film and self.serie:
+            raise ValidationError("You can only select either a film or a serie, not both.")
+        if not self.film and not self.serie:
+            raise ValidationError("You must select either a film or a serie.")
 
     def save(self, *args, **kwargs):
         # Chia giá trị cho 1000 trước khi lưu để giá trị lưu là 90.000 thay vì 90000.000
         if self.price >= 1000:
             self.price = self.price / Decimal('1000')
+
+
+        self.clean()    
         super().save(*args, **kwargs)
-   
+    
+
+
     def __str__(self):
-        return f"{self.film.name} | {self.start_time.strftime('%H:%M:%S')}"
+        return f"{self.film.name if self.film else self.serie.name} | {self.start_time.strftime('%H:%M:%S')}"
+  
+  
+    # def __str__(self):
+    #     return f"{self.film.name} | {self.start_time.strftime('%H:%M:%S')}"
     
 
 def generate_bookid(length=8):
@@ -240,7 +250,7 @@ class Bookings(models.Model):
         return self.book_payment.filter(vnp_ResponseCode="00").exists()
 
     def __str__(self):
-        return f"{self.bookid} | {self.user.username} | {self.shows.film.name} | {self.useat}"
+        return f"{self.bookid} | {self.user.username} | {self.shows.film.name if self.shows.film else self.shows.serie.name} | {self.useat}"
 
 class PaymentForm(forms.Form):
     order_id = forms.CharField(max_length=250)
@@ -262,10 +272,11 @@ class Payment(models.Model):
     vnp_TransactionNo = models.CharField(max_length=200,null=True,blank=True)
     vnp_ResponseCode = models.CharField(max_length=200,null=True,blank=True)    
 
-
+# Serie.objects.create(name="Default Serie", slug="default-serie")
 
 class Comment(models.Model):
-    film = models.ForeignKey(to=Film, on_delete=models.CASCADE)
+    film = models.ForeignKey(to=Film, on_delete=models.CASCADE,related_name='film_comments',null=True,blank=True)
+    serie = models.ForeignKey(to=Serie, on_delete=models.CASCADE,related_name='serie_comment',null=True,blank=True)
     user = models.ForeignKey(to='user_app.User', null=True, blank=True, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -279,7 +290,13 @@ class Comment(models.Model):
     class Meta:
         ordering = ['-created_at']  # Sắp xếp theo `created_at` giảm dần
     def __str__(self):
-        return f"Comment by {self.user} on {self.film.name}"
+        if self.film:
+            return f"Comment by {self.user} on Film: {self.film.name}"
+        elif self.serie:
+            return f"Comment by {self.user} on Serie: {self.serie.name}"
+        return f"Comment by {self.user}"    
+    # def __str__(self):
+    #     return f"Comment by {self.user} on {self.film.name}"
 
 class ChatHistory(models.Model):
     user = models.ForeignKey(to='user_app.User', null=True, blank=True, on_delete=models.CASCADE)

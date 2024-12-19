@@ -15,6 +15,7 @@ urlpatterns = [
     path('addshows/',views.add_shows,name='show'),
     path('chatbot/',views.ChatBot,name ='chatbot'),
     path('chat/',views.Chat,name ='chat'),
+    path('translate/',views.translate,name ='translate'),
 
     path('pay',views.index, name='index'),
     path('payment/<int:id>',views.payment, name='payment'),

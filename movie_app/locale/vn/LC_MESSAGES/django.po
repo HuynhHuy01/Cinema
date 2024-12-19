@@ -1,0 +1,136 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-11 10:30+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\movie_app\templates\booking.html:16
+msgid "Lịch sử đặt vé"
+msgstr ""
+
+#: .\movie_app\templates\booking.html:20
+msgid "Mã đặt vé"
+msgstr ""
+
+#: .\movie_app\templates\booking.html:21
+msgid "Tên phim"
+msgstr ""
+
+#: .\movie_app\templates\booking.html:22
+msgid "Chi tiết"
+msgstr ""
+
+#: .\movie_app\templates\booking.html:23
+msgid "Tổng tiền"
+msgstr ""
+
+#: .\movie_app\templates\booking.html:24
+msgid "Số ghế"
+msgstr ""
+
+#: .\movie_app\templates\booking.html:25 .\movie_app\templates\seat.html:249
+msgid "Xem vé"
+msgstr ""
+
+#: .\movie_app\templates\booking.html:26 .\movie_app\templates\booking.html:46
+#: .\movie_app\templates\film_download_page.html:231
+#: .\movie_app\templates\film_download_page.html:289
+msgid "Xóa"
+msgstr ""
+
+#: .\movie_app\templates\booking.html:40
+msgid "Xem"
+msgstr ""
+
+#: .\movie_app\templates\booking.html:42
+msgid "Thanh toán"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:82
+#: .\movie_app\templates\films_page.html:44
+#: .\movie_app\templates\series_page.html:44
+msgid "Thể loại"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:87
+msgid "Năm phát hành"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:89
+msgid "Ngôn ngữ"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:90
+msgid "Quốc gia"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:91
+#: .\movie_app\templates\films_page.html:48
+#: .\movie_app\templates\series_page.html:48
+msgid "Đạo diễn"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:92
+#: .\movie_app\templates\films_page.html:50
+#: .\movie_app\templates\series_page.html:51
+msgid "Diễn viên"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:226
+msgid "Sửa"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:249
+msgid "Sửa bình luận"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:260
+msgid "Nội dung"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:265
+msgid "Lưu"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:266
+#: .\movie_app\templates\film_download_page.html:290
+msgid "Hủy"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:279
+msgid "Xóa bình luận"
+msgstr ""
+
+#: .\movie_app\templates\film_download_page.html:298
+msgid "Phim cùng thể loại"
+msgstr ""
+
+#: .\movie_app\templates\films_page.html:63
+#: .\movie_app\templates\series_page.html:64
+msgid "Đặt vé"
+msgstr ""
+
+#: .\movie_app\templates\seat.html:233
+msgid "Ghế"
+msgstr ""
+
+#: .\movie_app\templates\seat.html:251
+msgid "Xác nhận"
+msgstr ""
+
+#: .\movie_app\templates\seat.html:254
+msgid "Đăng nhập"
+msgstr ""

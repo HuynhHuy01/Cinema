@@ -163,7 +163,7 @@ nav .navbarList .navbarItem {
   height: 40px;
   background-color: #00A647;
   text-align: center;
-  line-height: 44px;
+  /* line-height: 44px; */
   border-radius: 50%;
   margin-left: 10px;
 }
@@ -1024,10 +1024,25 @@ main > h1 {
     font-size: 17px;
 }
 
+
 .genre > i, .IMDBrate > i, .Dir > i, .Cast > i, .year > i, .country > i, .Lan > i {
-    margin-right: 14px;
+    
     font-size: 24px;
 }
+.genre > i{
+  margin-right: 14px;
+}
+
+.IMDBrate > i,.Dir > i,.year > i, .country > i{
+  margin-right: 25px;
+}
+.Cast > i{
+  margin-right: 15px;
+}
+ .Lan > i{
+  margin-right: 20px;
+}
+
 
 .genre i {
     color: #3D5698;

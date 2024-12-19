@@ -1,0 +1,51 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-10 16:42+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\home_app\templates\index.html:20
+msgid "Hot phim"
+msgstr "Trend Series"
+
+#: .\home_app\templates\index.html:130
+#, fuzzy
+#| msgid "Hot phim"
+msgid "Loạt phim gần đây"
+msgstr "Recent Series"
+
+#: .\home_app\templates\index.html:160
+#, fuzzy
+#| msgid "Hot phim"
+msgid "Phim chiếu rạp gần đây"
+msgstr "Recent films"
+
+#: .\home_app\templates\index.html:203 .\home_app\templates\index.html:251
+msgid "Thể loại"
+msgstr "Genre"
+
+#: .\home_app\templates\index.html:207 .\home_app\templates\index.html:255
+msgid "Đạo diễn"
+msgstr "Director"
+
+#: .\home_app\templates\index.html:209 .\home_app\templates\index.html:257
+msgid "Diễn viên"
+msgstr "Cast"
+
+#: .\home_app\templates\index.html:270
+msgid "Đặt vé"
+msgstr "Reserve"

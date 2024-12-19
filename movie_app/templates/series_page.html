@@ -5,7 +5,7 @@
 {% block title %}
     series
 {% endblock %}
-
+{% load i18n %}
 {% block body %}
     <section class="Section3">
         <div class="Section3BgEffect"></div>
@@ -41,14 +41,14 @@
                             <div class="MovieInfo">
 
                                 <div class="MovieTitle"><h2>{{ serie.name }}</h2></div>
-                                <div class="genre"><i class="fa fa-mask" aria-hidden="true"></i>Genre :
+                                <div class="genre"><i class="fa fa-mask" aria-hidden="true"></i>{%trans "Thể loại"%} :
                                     {% for genre in serie.genre.all %} {{ genre }}, {% endfor %}</div>
                                 <div class="IMDBrate"><i class="fa fa-imdb" aria-hidden="true"></i>IMDB
                                     : {{ serie.imdb }}</div>
-                                <div class="Dir"><i class="fa fa-user" aria-hidden="true"></i>Director
+                                <div class="Dir"><i class="fa fa-user" aria-hidden="true"></i>{%trans "Đạo diễn"%}
                                     : {{ serie.imdb }}
                                 </div>
-                                <div class="Cast"><i class="fas fa-users" aria-hidden="true"></i>Cast : {{ serie.cast }}
+                                <div class="Cast"><i class="fas fa-users" aria-hidden="true"></i>{%trans "Diễn viên"%} : {{ serie.cast }}
                                 </div>
 
                                 <div class="Des">
@@ -59,11 +59,25 @@
                             </div>
                         </div>
 
-                        <div class="Continue">
-                            <form action="{{ serie.get_absolute_url }}">
-                                <button class="AdameMatlab">Booking</button>
-                            </form>
+                        <div class="d-flex flex-wrap justify-content-between">
+                            {% for show in serie.serie_show.all %}
+                                <div class="col-lg-3 col-md-4 col-6 mb-3">
+                                    <form action="{% url 'seat' show.shows %}">
+                                        <button class="AdameMatlab btn btn-primary w-100 d-flex flex-column align-items-center">
+                                            <div class="d-flex flex-column text-center">
+                                                <span class="show-time">{{ show.start_time|date:"h:i A" }}</span>
+                                                <span class="show-date">{{ show.date}}</span>
+                                            </div>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endfor %}
                         </div>
+                        <!-- <div class="Continue">
+                            <form action="{{ serie.get_absolute_url }}">
+                                <button class="AdameMatlab">{%trans "Đặt vé" %}</button>
+                            </form>
+                        </div> -->
                     </article>
                 {% endfor %}
 
