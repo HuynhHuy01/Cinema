@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'user_app',
     'home_app',
     'movie_app',
-    'sorl.thumbnail'
+    'sorl.thumbnail',
+    'customadmin'
 ]
 
 MIDDLEWARE = [
@@ -115,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = 'vn'
 
 LANGUAGES = [
     ('en', 'English'),

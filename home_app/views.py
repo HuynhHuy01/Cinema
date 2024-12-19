@@ -7,19 +7,29 @@ from django.views import View
 
 from home_app.models import Slider, HomePageSlider, SiteSetting
 from movie_app.models import Film, Serie, Genre, Date
-
+from django.utils.translation import activate
 
 class HomeView(View):
     @staticmethod
     def get(request):
+        # Handle language activation
+        lang_code = request.GET.get('lang', 'vn')
+        if lang_code in ['vn', 'en']:
+           activate(lang_code)
+           request.session['django_language'] = lang_code
+
+        # Get the first active HomePageSlider instance (or None if none are active)
+        homepage_slider = HomePageSlider.objects.filter(is_active=True).first()
+
         context = {
             'slider': Slider.objects.filter(is_active=True).first(),
-            'latest_added_films': Film.objects.filter(is_active=True)[:5:-1],  # End of page
-            'latest_added_series': Serie.objects.filter(is_active=True)[:5:-1],  # End of page
-            'recent_series': HomePageSlider.objects.filter(is_active=True).first().recent_series_slider_2.all(),
-            'recent_films': HomePageSlider.objects.filter(is_active=True).first().recent_films_slider_1.all(),
+            'latest_added_films': Film.objects.filter(is_active=True).order_by('-id')[:5],  # Last 5 films
+            'latest_added_series': Serie.objects.filter(is_active=True).order_by('-id')[:5],  # Last 5 series
+            'recent_series': homepage_slider.recent_series_slider_2.all() if homepage_slider else [],
+            'recent_films': homepage_slider.recent_films_slider_1.all() if homepage_slider else [],
             'all_genres': Genre.objects.all(),
         }
+
         return render(request, 'index.html', context)
 
 

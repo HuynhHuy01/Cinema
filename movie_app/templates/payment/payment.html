@@ -14,8 +14,16 @@
 
             <div class="form-group">
                 <label for="order_type">Tên bộ phim </label>
+                {% if payment.shows.film %}
                 <input class="form-control" id="order_type"
                        name="order_type" type="text" value="{{payment.shows.film.name}}"/>
+                 {%endif%}    
+
+                 {% if payment.shows.serie %}
+                 <input class="form-control" id="order_type"
+                        name="order_type" type="text" value="{{payment.shows.serie.name}}"/>
+                  {%endif%} 
+
             </div>
             <div class="form-group">
                 <label for="order_id">Mã đặt vé </label>

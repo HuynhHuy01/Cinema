@@ -4,20 +4,107 @@
 {% block title %}
     Home
 {% endblock %}
-
+{% load i18n %}
+{% load static %}
 {% block body %}
+<style>
+        /* Modal container styling */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); /* Background overlay */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: #1e1e1e;
+            width: 350px;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        /* Ad logo or poster */
+        .modal-content img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* Ad title */
+        .modal-content h2 {
+            font-size: 20px;
+            margin: 10px 0;
+            color: #ffcc00;
+        }
+
+        /* Ad description */
+        .modal-content p {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        /* Buttons */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .button-container button {
+            flex: 1;
+            margin: 0 5px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            background-color: #555;
+            color: #fff;
+        }
+
+        .ok-btn {
+            background-color: #ff3d00;
+            color: #fff;
+        }
+
+        /* Small "Ad" badge */
+        .ad-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #ff0000;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 3px;
+        }
+</style>
     <div class="rt-container">
         <div class="col-rt-12">
             <div class="Scriptcontent" style="
                     background : url({{ slider.number_3.background.url }}) top no-repeat;
-                    background-size : cover;
-                    ">
+                    background-size : cover;">
 
                 <div class="bg-effect"></div>
                 <div class="Slidercontainer">
                     <div class="SliderHeader">
                         <div class="HSliderTitle">
-                            Trend Series
+                            {% trans "Hot phim" %}
                         </div>
                     </div>
                     <div class="wgh-slider">
@@ -127,7 +214,7 @@
     <section class="Section2">
 
         <div class="MovieSlider">
-            <div class="SliderTitle">Recent Series</div>
+            <div class="SliderTitle">{%trans "Loạt phim gần đây"%}</div>
             <main>
                 <section class="regular slider recentSeries-slider">
                     {% for recent_serie in recent_series %}
@@ -157,7 +244,7 @@
         <div class="Section3BgEffect"></div>
         <!-- Recently updated series -->
         <div class="Trends">
-            <div class="Trends-Title">Recent films</div>
+            <div class="Trends-Title">{%trans "Phim chiếu rạp gần đây" %}</div>
             <ul class="Catitems regular slider">
                 {% for genre in all_genres %}
                     <li class="Catitem">
@@ -200,13 +287,13 @@
                                 <div class="MovieTitle">
                                     <h2>{{ film.name }}</h2>
                                 </div>
-                                <div class="genre"><i class="fa fa-mask" aria-hidden="true"></i>Genre :
+                                <div class="genre"><i class="fa fa-mask" aria-hidden="true"></i>{%trans "Thể loại"%}:
                                     {% for genre in film.genre.all %}{{ genre }} {% endfor %}</div>
                                 <div class="IMDBrate"><i class="fa fa-imdb" aria-hidden="true"></i>IMDB
                                     : {{ film.imdb }}</div>
-                                <div class="Dir"><i class="fa fa-user" aria-hidden="true"></i>Director
+                                <div class="Dir"><i class="fa fa-user" aria-hidden="true"></i>{%trans "Đạo diễn"%}
                                     : {{ film.director }}</div>
-                                <div class="Cast"><i class="fas fa-users" aria-hidden="true"></i>Cast : {{ film.cast }}
+                                <div class="Cast"><i class="fas fa-users" aria-hidden="true"></i>{%trans "Diễn viên"%}: {{ film.cast }}
                                 </div>
                                 
                                 <div class="Des">
@@ -248,13 +335,13 @@
                                 <div class="MovieTitle">
                                     <h2>{{ serie.name }}</h2>
                                 </div>
-                                <div class="genre"><i class="fa fa-mask" aria-hidden="true"></i>Genre :
+                                <div class="genre"><i class="fa fa-mask" aria-hidden="true"></i>{%trans "Thể loại" %} :
                                     {% for genre in serie.genre.all %}{{ genre }} {% endfor %}</div>
                                 <div class="IMDBrate"><i class="fa fa-imdb" aria-hidden="true"></i>IMDB
                                     : {{ serie.imdb }}</div>
-                                <div class="Dir"><i class="fa fa-user" aria-hidden="true"></i>Director
+                                <div class="Dir"><i class="fa fa-user" aria-hidden="true"></i>{%trans "Đạo diễn"%}
                                     : {{ serie.director }}</div>
-                                <div class="Cast"><i class="fas fa-users" aria-hidden="true"></i>Cast : {{ serie.cast }}
+                                <div class="Cast"><i class="fas fa-users" aria-hidden="true"></i>{%trans "Diễn viên"%} : {{ serie.cast }}
                                 </div>
 
                                 <div class="Des">
@@ -265,11 +352,26 @@
                             </div>
                         </div>
 
-                        <div class="Continue">
-                            <form action="{{ serie.get_absolute_url }}">
-                                <button class="AdameMatlab">Booking</button>
-                            </form>
+                        <div class="d-flex flex-wrap justify-content-between">
+                            {% for show in serie.serie_show.all %}
+                                <div class="col-lg-3 col-md-4 col-6 mb-3">
+                                    <form action="{% url 'seat' show.shows %}">
+                                        <button class="AdameMatlab btn btn-primary w-100 d-flex flex-column align-items-center">
+                                            <div class="d-flex flex-column text-center">
+                                                <span class="show-time">{{ show.start_time|date:"h:i A" }}</span>
+                                                <span class="show-date">{{ show.date}}</span>
+                                            </div>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endfor %}
                         </div>
+
+                        <!-- <div class="Continue">
+                            <form action="{{ serie.get_absolute_url }}">
+                                <button class="AdameMatlab">{%trans "Đặt vé" %}</button>
+                            </form>
+                        </div> -->
                     </article>
                 {% endfor %}
             </main>
@@ -294,7 +396,42 @@
     </section>
     <div class="nav-mask">
     </div>
+        <!-- Modal Quảng Cáo -->
+    <!-- Modal -->
+    <div class="modal" id="ad-modal">
+        <div class="modal-content">
+            <div class="ad-badge" onclick="closeAd()">Ad</div>
+           
+            <img src="{% static 'img/ads.jpg' %}" style="width: 5em;" alt="Upcoming Blockbuster Poster" />
+            <h2>Upcoming Blockbuster</h2>
+            <p>Don't miss the most anticipated movie of the year! Experience the thrill and action in cinemas near you.</p>
+            <div class="button-container">
+                <button class="cancel-btn" onclick="closeAd()">Cancel</button>
+                <button class="ok-btn" onclick="confirmAd()">Book Tickets</button>
+            </div>
+        </div>
+    </div>
     {% if user.is_authenticated %}
     {% include 'chatbot/chat.html' %}
     {% endif %}
+
+    <script>
+        // Show the modal when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('ad-modal');
+            modal.style.display = 'flex'; // Display the modal
+        });
+
+        // Close the modal
+        function closeAd() {
+            const modal = document.getElementById('ad-modal');
+            modal.style.display = 'none';
+        }
+
+        // Confirm action
+        function confirmAd() {
+            alert('Thank you for confirming!');
+            closeAd();
+        }
+    </script>   
 {% endblock %}

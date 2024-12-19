@@ -1,3 +1,4 @@
+{% load i18n %}
 <style>
     /* Overall container */
     .userDashboard {
@@ -33,39 +34,18 @@
     }
     
     /* Show menu on hover */
-    .userDashboard:hover .dashboard-menu {
+    /* .userDashboard:hover .dashboard-menu {
+        display: block;
+    } */
+
+    .dashboard-menu {
         display: block;
     }
-    
     /* .dashboard-menu:hover {
         display: block;
     }
      */
     /* Language Toggle */
-    .language-toggle {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-    }
-    
-    .lang-btn {
-        padding: 5px 10px;
-        border: none;
-        background: #444; /* Muted color for inactive language */
-        color: #fff;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        transition: background 0.3s ease;
-    }
-    
-    .lang-btn.active {
-        background: #ff5722; /* Highlighted for active language */
-    }
-    
-    .lang-btn:hover {
-        background: #f9a825;
-    }
     
     /* Menu Items */
     .dashboard-menu ul {
@@ -116,20 +96,20 @@
         <ul class="navbarList">
             <li class="navbarItem {% if request.resolver_match.url_name == 'home-page' %}activeItem{% endif %}"><a
                     href="{% url 'home-page' %}"
-                    style="text-decoration: none; color: inherit">Home</a></li>
+                    style="text-decoration: none; color: inherit">{% trans "Trang chủ" %}</a></li>
             <li class="navbarItem {% if request.resolver_match.url_name == 'serie-list-page' %}activeItem{% endif %}">
                 <a
                         href="{% url 'serie-list-page' %}"
-                        style="text-decoration: none; color: inherit">Series</a>
+                        style="text-decoration: none; color: inherit">{% trans "Loạt phim" %}</a>
             </li>
             <li class="navbarItem {% if request.resolver_match.url_name == 'film-list-page' %}activeItem{% endif %}">
                 <a
                         href="{% url 'film-list-page' %}"
-                        style="text-decoration: none; color: inherit">Films</a>
+                        style="text-decoration: none; color: inherit">{% trans "Phim chiếu rạp" %}</a>
             </li>
-            <li class="navbarItem">Contact Us</li>
+            <li class="navbarItem">{% trans "Liên hệ" %}</li>
             {% if user.is_superuser and user.is_authenticated %}
-                <li class="navbarItem"><a href="/admin" target="_blank" style="text-decoration: none; color: inherit">Admin</a>
+                <li class="navbarItem"><a href="/admin" target="_blank" style="text-decoration: none; color: inherit">{%trans "Quản trị viên"%}</a>
                 </li>
 
             {% endif %}
@@ -155,15 +135,14 @@
                         <div class="dashboard-menu">
                             <!-- Language Toggle -->
                             <div class="language-toggle">
-                                <button class="lang-btn active">VN</button>
-                                <button class="lang-btn">EN</button>
+                                 {%include 'translate/translate.html'%}
                             </div>
-                            <hr />
+                        
                             <!-- Menu Items -->
                             <ul>
                                 <li>
                                     <a href="{%url 'bookings'%}">
-                                        <i class="fas fa-film"></i> My Tickets
+                                        <i class="fas fa-film"></i> {% trans "Vé của tôi" %}
                                     </a>
                                 </li>
                                 <!-- <li>
@@ -173,7 +152,7 @@
                                 </li> -->
                                 <li>
                                     <a href="{% url 'logout' %}">
-                                        <i class="fas fa-sign-out-alt"></i> Logout
+                                        <i class="fas fa-sign-out-alt"></i> {% trans "Đăng xuất" %}
                                     </a>
                                 </li>
                             </ul>

@@ -19,6 +19,7 @@ from tensorflow import keras
 import tensorflow
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Dropout  
+from tensorflow.keras.optimizers import SGD
 
 import nltk
 import pickle
@@ -29,13 +30,23 @@ from django.shortcuts import redirect
 # nltk.download('wordnet')
 
 from keras.models import load_model
-
+from django.utils import timezone
+from transformers import pipeline
+from django.utils.translation import activate
 
 
 class SerieComponent(DetailView):
     template_name = 'serie_download_page.html'
     model = Serie
     context_object_name = 'serie'
+
+    def get(self, request, *args, **kwargs):
+        # Language activation logic
+        lang_code = request.GET.get('lang', 'vn')
+        activate(lang_code)
+        request.session['django_language'] = lang_code
+
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -44,10 +55,21 @@ class SerieComponent(DetailView):
         context['parts'] = Part.objects.filter(season__serie__slug=loaded_serie.slug).all()
         context['trailer'] = loaded_serie.trailer.url if loaded_serie.trailer else None
         context['related_series'] = Serie.objects.filter(genre=loaded_serie.genre.first()).exclude(pk=loaded_serie.id)
+
+        context['comments'] = Comment.objects.filter(serie=loaded_serie)
+        context['form'] = CommentForm()
+
+        all_ratings = Comment.objects.filter(serie=loaded_serie).values_list('rating', flat=True)
+        context['average_rating'] = sum(all_ratings) / len(all_ratings) if all_ratings else 0
+        context['loop_time'] = range(5,0,-1)
+        context['loop_times'] = range(1,6)
+
+
         if self.request.user.is_authenticated:
-            context['is_favorite'] = self.request.user.saved_series.filter(pk=loaded_serie.id).exists()
+             context['is_favorite'] = self.request.user.saved_series.filter(pk=loaded_serie.id).exists()
         user_ip = get_client_ip(self.request)
         user_id = None
+
         if self.request.user.is_authenticated:
             user_id = self.request.user.id
 
@@ -58,9 +80,45 @@ class SerieComponent(DetailView):
             new_visit.save()
 
         return context
+    
+    def post(self, request, *args, **kwargs):
+        # Handle POST request for comments
+        self.object = self.get_object()  # Load the film object
+        
+        edit_comment_id = request.POST.get('edit_comment_id')
+        if edit_comment_id:
+            comment = get_object_or_404(Comment, id=edit_comment_id)  # Fetch the comment
+            if comment.user == request.user:  # Ensure the user is the comment owner
+                comment.content = request.POST.get('content')  # Update the comment content
+                # comment.content = request.POST.get('content', comment.content)
+                comment.created_at = timezone.now()  # Update created_at to now
+                comment.save()  # Save the comment
+                return redirect(reverse('serie-page', kwargs={'slug': self.object.slug}))
+        
+        
+        # Handle comment deletion
+        delete_comment_id = request.POST.get('delete_comment_id')
+        if delete_comment_id:
+            comment = get_object_or_404(Comment, id=delete_comment_id)  # Fetch the comment
+            if comment.user == request.user:  # Ensure the user is the comment owner
+                comment.delete()  # Delete the comment
+                return redirect(reverse('serie-page', kwargs={'slug': self.object.slug}))  
 
-from django.utils import timezone
-from transformers import pipeline
+      
+            
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.serie = self.object
+            comment.user = request.user
+            comment.save()
+            return redirect(reverse('serie-page', kwargs={'slug': self.object.slug}))
+
+        context = self.get_context_data()
+        context['form'] = form
+        return self.render_to_response(context)
+
+
 
 
 sentiment_analyzer = pipeline("sentiment-analysis")
@@ -68,6 +126,14 @@ class FilmComponent(DetailView):
     template_name = 'film_download_page.html'
     model = Film
     context_object_name = 'film'
+
+    def get(self, request, *args, **kwargs):
+        # Language activation logic
+        lang_code = request.GET.get('lang', 'vn')
+        activate(lang_code)
+        request.session['django_language'] = lang_code
+
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -185,6 +251,14 @@ class FilmList(ListView):
     ordering = ['-imdb']
     paginate_by = 6
 
+    def get(self, request, *args, **kwargs):
+        # Language activation logic
+        lang_code = request.GET.get('lang', 'vn')
+        activate(lang_code)
+        request.session['django_language'] = lang_code
+
+        return super().get(request, *args, **kwargs)
+    
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['most_visit'] = Film.objects.filter(is_active=True).annotate(
@@ -204,6 +278,14 @@ class SerieList(ListView):
     ordering = ['-imdb']
     paginate_by = 6
 
+    def get(self, request, *args, **kwargs):
+        # Language activation logic
+        lang_code = request.GET.get('lang', 'vn')
+        activate(lang_code)
+        request.session['django_language'] = lang_code
+
+        return super().get(request, *args, **kwargs)
+    
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['most_visit'] = Serie.objects.filter(is_active=True).annotate(
@@ -219,10 +301,20 @@ def seat(request,id):
     user_has_booking = False
     if request.user.is_authenticated:
         user_has_booking = Bookings.objects.filter(user=request.user, shows=show).exists()
+    
+    lang_code = request.GET.get('lang','vn')
+    if lang_code in ['en','vn']:
+        activate(lang_code)
+        request.session['django_language'] = lang_code   
+
     return render(request,"seat.html", {'show':show, 'seat':seat,'user_has_booking':user_has_booking})    
 
 def ticket(request,id):
     ticket = Bookings.objects.get(id=id)
+    lang_code = request.GET.get('lang','vn')
+    if lang_code in ['vn','en']:
+        activate(lang_code)
+        request.session['django_language'] = lang_code
     return render(request,"ticket.html", {'ticket':ticket})
 
 def booked(request):
@@ -242,8 +334,13 @@ def bookings(request):
 
     # # Use the book_ids list to filter payments
     # payments = Payment.objects.filter(book_id__in=book_ids)
-    return render(request,"booking.html", {'book':book} )   
 
+    lang_code = request.GET.get('lang','vn')
+    if lang_code in ['vn','en']:
+        activate(lang_code)
+        request.session['django_language'] = lang_code
+    
+    return render(request,"booking.html", {'book':book} )   
 
 
 def delete(request,id):
@@ -256,11 +353,19 @@ def add_shows(request):
     return render(request,"addshow.html")
 
 
+def translate(request):
+    lang_code = request.GET.get('lang')
+    if lang_code in ['en', 'vn']:  # Ensure you are switching to a valid language code
+        activate(lang_code)
+        request.session['django_language'] = lang_code
+
+    return render(request,'translate/translate.html')
+
+
 def ChatBot(request):
     return render(request,"chatbot/chat.html")
 
 
-from tensorflow.keras.optimizers import SGD
 def train_chatbot():
     lemmatizer = WordNetLemmatizer()
 
@@ -327,7 +432,7 @@ def train_chatbot():
     model.save('chatbot_model.h5')
     print("Model training complete and saved as chatbot_model.h5")
 
-train_chatbot()
+# train_chatbot()
 
 
 def Chat(request):

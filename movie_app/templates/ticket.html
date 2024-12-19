@@ -3,7 +3,7 @@
 {% block title %}
          {{ticket.shows.film.name}}
 {% endblock %}
-
+{% load i18n %}
 
 
 {% block body %}
@@ -28,25 +28,37 @@
         <div class="col-9">
           <div class="row">
             <div class="col-6">
-              <h3>Booking ID :<span> {{ticket.bookid}}</span> </h3>
-              <h3>Date :<span> {{ticket.shows.date}}</span> </h3>
-              <h3>Price :<span> {{ticket.total_price}} VND</span> </h3>
+              <h3>{%trans "Mã đặt vé" %} :<span> {{ticket.bookid}}</span> </h3>
+              <h3>{%trans "Ngày" %} :<span> {{ticket.shows.date}}</span> </h3>
+              <h3>{%trans "Số tiền" %} :<span> {{ticket.total_price}} VND</span> </h3>
             </div>
             <div class="col-6">
-              <h3>Seats :<span> {{ticket.useat}}</span> </h3>
-              <h3>Time :<span> {{ticket.shows.start_time}}</span> </h3>
-              <h3>Screen :<span>{{ticket.shows.screen}}</span> </h3>
+              <h3>{%trans "Số ghế" %}:<span> {{ticket.useat}}</span> </h3>
+              <h3>{%trans "Thời gian" %} :<span> {{ticket.shows.start_time}}</span> </h3>
+              <h3>{%trans "Màn hình" %} :<span>{{ticket.shows.screen}}</span> </h3>
             </div>
+
+            {% if ticket.shows.film %}
             <div class="col-12 mt-3 info">
                <i class="fa fa-location-arrow"></i> {{ticket.shows.film.name}} : <span> {{ticket.useat}}</span>
             </div>
+            {%endif%}
+
+            {% if ticket.shows.serie %}
+            <div class="col-12 mt-3 info">
+               <i class="fa fa-location-arrow"></i> {{ticket.shows.serie.name}} : <span> {{ticket.useat}}</span>
+            </div>
+            {%endif%}
+
+
           </div>
         </div>
       </div>
     </div>
   </div>
-
+  {% if user.is_authenticated %}
+  {% include 'chatbot/chat.html' %}
+  {% endif %}
 
 {% endblock %}
 
-<div class = "col-lg-3"

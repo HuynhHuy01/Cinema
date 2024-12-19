@@ -3,32 +3,42 @@
 {% block title %}
          {{show.film.name}}
 {% endblock %}
-
-
-
+{% load i18n %}
 {% block body %}
 
 <link rel="stylesheet" href="/assets/css/seat.css">
 
-{% thumbnail show.film.background "850x230" crop="center" as im %}
+<!-- {% thumbnail show.film.background "850x230" crop="center" as im %}
 <style>
+  
   .hall__screen {
     background-image: url('{{ im.url }}');
   }
 </style>
-{% endthumbnail %}
+{% endthumbnail %} -->
 
 <div class="d-none">
+
+  {%if show.film %}
   <div class="col-2">
     <img src="{{show.film.background.url}}" height="300px">
   </div>
+  {%endif%}
 
-  <div class="col-3">
+  {%if show.serie %}
+  <div class="col-2">
+    <img src="{{show.serie.background.url}}" height="300px">
+  </div>
+  {%endif%}
+
+
+
+  <!-- <div class="col-3">
     <h1 class="display-5"> {{show.film.name}} </h1>
     <h1 class="display-5"> {{show.start_time}} </h1>
     <h1 class="display-5"> {{show.end_time}} </h1>
     <h1 class="display-5"> Rs {{show.price}} </h1>
-  </div>
+  </div> -->
 </div>
 
 <div class="container-fluid">
@@ -37,8 +47,18 @@
       <form action="{% url 'booked' %}" method="POST" id="book" onsubmit="return validateSeatSelection();">
         {% csrf_token %}
         <input type="hidden" value="{{show.shows}}" name="show" readonly>
+        {%if show.film %}
+        <div class="hall__screen">
+          <img src="{{show.film.background.url}}">
+        </div>
+        {%endif%}
+        {%if show.serie %}
+        <div class="hall__screen">
+          <img src="{{show.serie.background.url}}">
+        </div>
+        {%endif%}
 
-        <div class="hall__screen"></div>
+
         <div class="seats">
           <div class="row">
             <h3 class="text-white m-2">A</h3>
@@ -232,7 +252,7 @@
 
   <div class="row bottom">
     <div class="col-9">
-      <h1 class="text-white">Selected Seats : <span id="slots"></span></h1>
+      <h1 class="text-white">{%trans "Ghế"%} : <span id="slots"></span></h1>
     </div>
     
 <!-- Dark Overlay Background -->
@@ -248,17 +268,20 @@
     <div class="col-3">
       {% if user.is_authenticated %}
       {% if user_has_booking %}
-      <a href="/movies/bookings" class="btn btn-lg btn-block btn-danger">View Ticket </a>
+      <a href="/movies/bookings" class="btn btn-lg btn-block btn-danger">{%trans "Xem vé"%} </a>
       {%else%}
-      <button type="submit" form="book" class="btn btn-lg btn-block btn-primary"> Confirm Booking </button>
+      <button type="submit" form="book" class="btn btn-lg btn-block btn-primary"> {%trans "Xác nhận" %} </button>
       {%endif%}
       {% else %}
-      <a href="/user/login" class="btn btn-lg btn-block btn-danger"> Login To Book </a>
+      <a href="/user/login" class="btn btn-lg btn-block btn-danger"> {%trans "Đăng nhập" %} </a>
       {% endif %}
     </div>
   </div>
 
 </div>
+{% if user.is_authenticated %}
+{% include 'chatbot/chat.html' %}
+{% endif %}
 
 {% for seat in seat%}
 <script type="text/javascript">

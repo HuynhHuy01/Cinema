@@ -1,0 +1,153 @@
+.them{
+    background: #14B6FF;
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+.khoangcach{
+    margin-top: 20px;
+}
+.sua{
+    background: #04B962;
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+.xoa{
+    background: #F43643;
+    padding: 5px 10px;
+    border-radius: 10px;
+}
+.cachle{
+    margin-left: 354px;
+}
+.khoangcach table tbody tr td img{
+    width: 100px;
+    height: 100px;
+}
+#category{
+    width: 100%;
+    height: 30px;
+}
+.addfr div textarea{
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    border: none;
+    color: white;
+}
+.addfr div select option{
+    background: none;
+    color: #14B6FF;
+}
+.addfr div select{
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    border: none;
+    color: white;
+}
+
+select{
+    width: 100%;
+    height: 30px;
+}
+.success{
+    background: #0c7a50;
+    padding: 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 15px;
+    width: 20%;
+    margin-left: 2%;
+    border: 2px solid yellow;
+}
+.errors{
+    background: #F8B132;
+    padding: 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 15px;
+    width: 20%;
+    margin-left: 30%;
+    border: 2px solid yellow;
+}
+.confirm-dialog {
+     position: fixed;
+     top: 0;
+     left: 0;
+     width: 100%;
+     height: 100%;
+     background-color: rgba(0, 0, 0, 0.6);
+     display: none;
+     justify-content: center;
+     align-items: center;
+ }
+
+.confirm-dialog div{
+    position: absolute;
+    top: 50%;
+    right: 30%;
+    text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.confirm-dialog div p {
+    color: black;
+    font-size: 18px;
+}
+
+.confirm-dialog div button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.confirm-ok {
+    background-color: #4CAF50;
+    color: #fff;
+}
+
+.confirm-cancel {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.confirm-dialog-open {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+input.active {
+    border: 2px solid blue;
+}
+
+input.invalid {
+    border: 2px solid red;
+}
+.drpr ul li a{
+    padding: 13px 5px 13px 15px;
+    display: block;
+    border-left: 3px solid transparent;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 15px;
+}
+.drpr ul li{
+    list-style: none;
+    padding: 0 34px;
+}
+.drpr ul {
+    padding: 0;
+}
+.drpr ul li:hover{
+    display: block;
+    border-left: 3px solid transparent;
+    background: rgba(255, 255, 255, 0.15);
+
+}
+
+
+
